@@ -1,0 +1,10 @@
+{{#each renderTasks as |task|}}
+
+  {{#if task.rendered}}
+    {{component task.componentName
+      _renderTask=task
+      route=task.attributes
+    }}
+  {{/if}}
+
+{{/each}}

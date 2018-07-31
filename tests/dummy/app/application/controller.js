@@ -1,6 +1,6 @@
 import Controller from '@ember/controller';
-import Ember from 'ember';
+import { match } from '@ember/object/computed';
 
-const { testing } = Ember;
-
-export default Controller.extend({ testing });
+export default Controller.extend({
+  testing: match('currentRouteName', /^test/)
+});

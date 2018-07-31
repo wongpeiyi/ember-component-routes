@@ -13,7 +13,10 @@
 
 <h2 id="fade-to-white">Fade To White</h2>
 
-{{component-outlet "white" class="animation-box"}}
+{{component-outlet "white"
+  class="animation-box"
+  id="outlet_fade-to-white"
+}}
 
 <p>
   To achieve this, we create a mixin used by both components rendered by the <code>component-outlet</code>. When the component is rendered, it should immediately fade in from opacity 0 to 1. Before the component is torn down, it should fade out to opacity 0:
@@ -71,7 +74,10 @@ export default Mixin.create({
 {{/code-block}}
 
 
-{{component-outlet "attempt" class="animation-box"}}
+{{component-outlet "attempt"
+  class="animation-box"
+  id="outlet_attempt"
+}}
 
 <p>
   However, there is a problem with the fade out &mdash; without a returned promise, the outgoing component is torn down and destroyed instantly, before the fade out can happen.
@@ -97,14 +103,20 @@ willTeardownComponent(toComponent, toRoute, teardown) {
   We then chain the provided <code>teardown</code> function after the fade out animation, which manually resumes the component teardown process (i.e. <code>willDestroyElement</code>, etc) after the animation completes.
 </p>
 
-{{component-outlet "cross-fade" class="animation-box"}}
+{{component-outlet "cross-fade"
+  class="animation-box"
+  id="cross-fade"
+}}
 
 
 {{!-- route-dependent --}}
 
 <h2 id="route-dependent">Route-Dependent Animations</h2>
 
-{{component-outlet "route-dependent" class="animation-box"}}
+{{component-outlet "route-dependent"
+  class="animation-box"
+  id="route-dependent"
+}}
 
 <p>
   In this example, the middle component (2) should &mdash;

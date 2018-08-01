@@ -1,0 +1,64 @@
+.side-bar {
+  float: left;
+  width: 280px;
+  padding-right: 20px;
+  margin: 18px 40px 0 0;
+
+  &:before {
+    content: "";
+    background: #f9f9f9;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: calc(50% + 260px);
+    bottom: 0;
+    min-height: 100vh;
+    z-index: 1;
+  }
+
+  > div {
+    position: relative;
+    z-index: 2;
+  }
+
+  h1 {
+    font-size: $f-1;
+    font-weight: 600;
+    padding: 11px 0 10px;
+    margin: 18px 0 6px;
+  }
+
+  a {
+    display: block;
+    padding: 2px 0 10px;
+    user-select: none;
+
+    &.active {
+      color: $f-purple;
+      cursor: default;
+      text-decoration: none;
+    }
+  }
+
+  ul {
+    list-style: none;
+    border-left: 1px solid rgba($f-purple, 0.7);
+    margin: 0 0 16px 15px;
+    padding: 4px 0;
+  }
+
+  li a {
+    font-size: 0.875em;
+    color: rgba($f-purple, 0.9);
+    padding: 0 0 3px 16px;
+    margin-left: -1px;
+    border-left: 0 solid $f-purple;
+    transition: all 0.15s ease-out;
+
+    &:hover {
+      color: $f-purple;
+      text-decoration: none;
+      border-left-width: 4px;
+    }
+  }
+}

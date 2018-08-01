@@ -1,0 +1,35 @@
+<h1>Component Hooks</h1>
+
+<p>
+  <strong>ember-component-routes</strong> injects three hooks to components rendered by a <code>component-outlet</code>:
+</p>
+
+<ul>
+  <li>
+    <code>didRenderComponent</code> &mdash; after a component's <code>didRender</code>
+  </li>
+  <li>
+    <code>didUpdateRouteAttrs</code> &mdash; after a component's <code>@route</code> attributes are updated subsequently
+  </li>
+  <li>
+    <code>willTeardownComponent</code> &mdash; before a component's <code>willDestroyElement</code>
+  </li>
+</ul>
+
+<p>
+  <code>didRenderComponent</code> and <code>willTeardownComponent</code> are async functions, meaning they can optionally return a promise that will pause and enqueue subsequent renders and teardowns by the <code>component-outlet</code> until the promise is resolved.
+</p>
+
+<p>
+  This effectively allows you to craft "blocking" animations on route transitions. See the {{link-to 'Animations' 'animations'}} section for examples, and the {{link-to 'API Reference' 'api-component'}} for details.
+</p>
+
+<p>
+  <code>didUpdateRouteAttrs</code> allows you to trigger behaviour when the route's attributes change but the rendered component remains the same, e.g. a change in query params only.
+</p>
+
+
+<footer>
+  {{link-to 'Query Params' 'query-params'}}
+  {{link-to 'Examples: Animations' 'animations'}}
+</footer>

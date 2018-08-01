@@ -1,0 +1,85 @@
+<h1>Query Params</h1>
+
+<p>
+  Query parameters are the last piece functionality that controllers provide in classic Ember. They can now be solely defined on the route:
+</p>
+
+{{#code-block type="js" title="posts/route.js"}}
+import { ComponentRoute } from 'ember-component-routes';
+
+export default ComponentRoute.extend({
+
+  queryParams: {
+    page: {
+      as: 'p',
+      refreshModel: true,
+      defaultValue: 1
+    }
+  }
+
+});
+{{/code-block}}
+
+<p>
+  The classic Ember <a href="https://emberjs.com/api/ember/release/classes/Route/properties/queryParams?anchor=queryParams" target="_blank">query params configuration options</a> (specifically <code>as</code> and <code>refreshModel</code>) are preserved, while <code>defaultValue</code> is newly added.
+</p>
+
+<h2>Using Query Params</h2>
+
+<p>
+  Query param values are available in the <code>attributes</code> hook. They can also be accessed via the classic <code><a href="https://emberjs.com/api/ember/release/classes/Route/methods/paramsFor?anchor=paramsFor" target="_blank">paramsFor</a></code> method.
+</p>
+
+{{#code-block type="js" title="posts/route.js"}}
+import { ComponentRoute } from 'ember-component-routes';
+
+export default ComponentRoute.extend({
+
+  queryParams: {
+    page: {
+      as: 'p',
+      refreshModel: true,
+      defaultValue: 1
+    },
+
+    showComments: {
+      as: 'comments'
+    }
+  },
+
+  // Changes to `page` will refresh the model hook
+  model({ page }) {
+    return this.store.query('post', { page });
+  },
+
+  // Changes to `showComments` will refresh the attributes hook
+  attributes(model, { showComments }, actions) {
+    return { model, showComments, actions };
+  }
+});
+{{/code-block}}
+
+<p>
+  If a query param affects the <code>model</code> hook, <code>refreshModel</code> should be set to <code>true</code>. Otherwise, query params will by default only refresh the <code>attributes</code> hook, updating the attributes set on the rendered components.
+</p>
+
+
+<h2>Unidirectional Data Flow</h2>
+
+<p>
+  In classic Ember, updating a controller property that is a query param would cause a route transition. However, this opposes the <a href="https://emberway.io/ember-js-goodbye-mvc-part-1-21777ecfd708" target="_blank">unidirectional data flow</a> that is recommended as a modern-day best practice in other parts of the framework.
+</p>
+
+<p>
+  Using <strong>ember-component-routes</strong> enforces query params to flow only one way: from routes down to components. Updating query params should be done via route transitions only, which can be done easily from the component layer using the new <a href="https://emberjs.com/api/ember/release/classes/RouterService" target="_blank">RouterService</a>.
+</p>
+
+<p>
+  Because of this, the <code>replace</code> option in the route's query params configuration is no longer relevant.
+</p>
+
+
+<footer>
+  {{link-to 'Passing Attributes & Actions' 'attributes'}}
+  {{link-to 'Component Hooks' 'component-hooks'}}
+</footer>

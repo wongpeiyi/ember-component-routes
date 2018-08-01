@@ -1,0 +1,47 @@
+$f-10: 4.000em;
+$f-9: 3.4822em;
+$f-8: 3.0314em;
+$f-7: 2.6390em;
+$f-6: 2.2974em;
+$f-5: 2.0000em;
+$f-4: 1.7411em;
+$f-3: 1.5157em;
+$f-2: 1.3195em;
+$f-1: 1.1487em;
+
+$f-blue: #00A1DF;
+$f-purple: #79589F;
+$f-black: #333;
+
+html,
+body {
+  font-family: 'Roboto', Helvetica, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: $f-black;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-size: 1em;
+  font-weight: 600;
+  margin: 0;
+}
+
+a {
+  transition: color 0.1s ease-out;
+  text-decoration: none;
+  color: $f-blue;
+
+  &:focus {
+    outline: 0;
+  }
+
+  &:hover {
+    color: lighten($f-blue, 5%);
+    text-decoration: underline;
+  }
+}
+
+strong {
+  font-weight: 600;
+}

@@ -1,0 +1,85 @@
+$code-bg: #282c34;
+$code-fg: #abb2bf;
+$comment-fg: #5c6370;
+
+code,
+.code-block pre {
+  font-family: 'Roboto Mono', monospace;
+  line-height: 20px;
+}
+
+code {
+  font-size: 0.875em;
+  color: #32293F;
+  background: #F3EEFA;
+  padding: 1px 0.357em 3px;
+  margin: 0 2px;
+}
+
+.code-block {
+  @include clearfix;
+  background: $code-bg;
+  margin: 24px 0;
+  padding: 2px 0 6px;
+
+  pre,
+  code {
+    margin: 0;
+  }
+}
+
+.code-block__title pre {
+  font-size: 12px;
+  color: darken($code-fg, 10%);
+  background: darken($code-bg, 7%);
+  padding: 5px 10px;
+}
+
+.code-block__numbers {
+  font-size: 0.875em;
+  text-align: right;
+  color: $comment-fg;
+  background: $code-bg;
+  float: left;
+  padding: 11px 12px 9px;
+  user-select: none;
+  pointer-events: none;
+
+  .code-block_no-line-numbers & {
+    display: none;
+  }
+
+  .code-block__title ~ & {
+    padding-top: 13px;
+    padding-bottom: 13px;
+  }
+}
+
+.code-block__code {
+  cursor: text;
+
+  code {
+    background: none;
+    padding: 10px 15px;
+
+    + code {
+      margin-top: -46px;
+    }
+  }
+
+  .code-block__title ~ & code {
+    padding-top: 12px;
+    padding-bottom: 14px;
+  }
+}
+
+// Diff
+
+.code-block__minus {
+  background: rgba(#ff6666, 0.1);
+}
+
+.code-block__plus {
+  background: rgba(#99ff66, 0.1);
+}
+

@@ -1,0 +1,15 @@
+{{#if testing}}
+
+  {{outlet}}
+
+{{else}}
+
+  {{top-bar}}
+
+  <div class="container">
+    {{side-menu}}
+
+    {{component-outlet class="main"}}
+  </div>
+
+{{/if}}

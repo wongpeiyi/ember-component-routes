@@ -1,0 +1,99 @@
+<h1>Passing Attributes &amp; Actions</h1>
+
+<p>
+  The classic Ember route lifecycle looks something like this:
+</p>
+
+<img src={{root-url "/img/classic-ember-routing.png"}} class="attributes__classic">
+
+<p>
+  <strong>ember-component-routes</strong> greatly simplifies the flow by removing the controller and template:
+</p>
+
+<img src={{root-url "/img/ember-component-routes-routing.png"}} class="attributes__component">
+
+<p>
+  The result of the <code>model</code> hook is now passed to an intermediary <code>attributes</code> hook, the result of which is in turn passed to all components rendered by the <code>renderComponents</code> hook.
+</p>
+
+<h2>Attributes Hook</h2>
+
+<p>
+  The <code>attributes</code> hook receives as arguments:
+</p>
+
+<ol>
+  <li>
+    <code>model</code> &mdash; the result of the <code>model</code> hook
+  </li>
+  <li>
+    <code>params</code> &mdash; a hash of the route's positional and query params
+  </li>
+  <li>
+    <code>actions</code> &mdash; a hash of the route's custom-defined actions as closures
+  </li>
+</ol>
+
+<p>
+  This allows you to define the exact attributes and actions that are passed to the rendered components.
+</p>
+
+<p>
+  For example:
+</p>
+
+{{#code-block type="js" title="post/route.js"}}
+import { ComponentRoute } from 'ember-component-routes';
+
+export default ComponentRoute.extend({
+
+  model({ id }) {
+    return this.store.findRecord('post', id);
+  },
+
+  attributes(model, params, actions) {
+    return { model, params, actions };
+  },
+
+  renderComponents() {
+    this.renderComponent('post-page');
+  },
+
+  actions: {
+    reload() {
+      this.refresh();
+    }
+  }
+});
+{{/code-block}}
+
+<p>
+  When the <code>post-page</code>component renders, it will have access to these attributes via <code>@route</code>:
+</p>
+
+{{#code-block type="hbs" title="post-page/template.hbs"}}
+&lt;h1&gt;&#123;&#123;@route.model.title&#125;&#125; &ndash; #&#123;&#123;@route.params.id&#125;&#125;&lt;/h1&gt;
+
+&lt;button onclick=&#123;&#123;@route.actions.reload&#125;&#125;&gt;Reload&lt;/button&gt;
+{{/code-block}}
+
+<h2 id="application-level">Application-Level Attributes</h2>
+
+<p>
+  A special case exists when you extend your <code>application/route</code> as a <code>ComponentRoute</code>:
+</p>
+
+<ul>
+  <li><code>renderComponents</code> will not render any components</li>
+  <li><code>renderTemplate</code> will render the <code>application</code> template as per classic Ember</li>
+  <li><code>attributes</code> will be merged into the result of <em>all</em> other routes' <code>attributes</code> hooks</li>
+</ul>
+
+<p>
+  For example, query params defined on your <code>application</code> route can serve as global attributes accessible by any rendered component.
+</p>
+
+<footer>
+  {{link-to 'Rendering Components' 'rendering'}}
+  {{link-to 'Query Params' 'query-params'}}
+</footer>

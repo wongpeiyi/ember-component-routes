@@ -1,0 +1,136 @@
+<h1>Skeleton Loading UI</h1>
+
+<p>
+  There are many valid ways to achieve skeleton loading UI in Ember, e.g. using <a href="https://emberway.io/skeleton-screen-loading-in-ember-js-2f7ac2384d63" target="_blank">loader components</a>, or by <a href="https://engineering.linkedin.com/blog/2016/12/ember-concurrency--or--how-i-learned-to-stop-worrying-and-love-t" target="_blank">using ember-concurrency</a>. This example serves only to illustrate how it can be achieved with <strong>ember-component-routes</strong>.
+</p>
+
+<h2 id="desired-behaviour">Desired Behaviour</h2>
+
+<p>
+  The desired behaviour looks something like this:
+</p>
+
+<p>
+  First of all, we want the <code>posts-page</code> component to be displayed immediately upon transition instead of blocking the UI while data is fetching.
+</p>
+
+<p>
+  On first load, we also want it to:
+</p>
+
+<ul>
+  <li>Show a <code>loading-bar</code> while data is being fetched</li>
+  <li>Show <code>loading-placeholders</code> in place of the posts</li>
+  <li>Display the posts after loading, or a <code>blank-slate</code> template if none exist</li>
+</ul>
+
+<p>
+  On subsequent loads, it should:
+</p>
+
+<ul>
+  <li>Show a <code>loading-bar</code> while data is fetched for a background update</li>
+  <li>Show any already loaded posts while background updating</li>
+  <li>Display the posts after loading, or a <code>blank-slate</code> template if none exist</li>
+</ul>
+
+<h2 id="implementation">Implementation</h2>
+
+{{#code-block type="js" title="posts/route.js"}}
+import { ComponentRoute } from 'ember-component-routes';
+
+export default ComponentRoute.extend({
+
+  queryParams: {
+    search: {
+      refreshModel: true,
+      as: 'q'
+    }
+  },
+
+  // Always fetch from API but resolve immediately
+  model({ search }) {
+    const query = this.store.query('post', { search, reload: true })
+      .then(() => this.refreshAttributes());
+
+    return { query };
+  },
+
+  // Pass the fetch query, as well as any loaded posts
+  attributes({ query }, { search }, actions) {
+    const posts = this._matchingPostsFromStore(search);
+
+    return { query, posts, search, actions };
+  },
+
+  renderComponents() {
+    this.renderComponent('posts-page');
+  },
+
+  // Retrieve any matching posts that were previously loaded
+  _matchingPostsFromStore(search) {
+    return this.store.peekAll('post')
+      .filter((post) => post.get('title').match(search));
+  },
+
+  actions: {
+    clearSearch() {
+      this.transitionTo('posts', { queryParams: { search: null } });
+    }
+  }
+});
+{{/code-block}}
+
+<p>
+  To achieve this, we have the <code>model</code> hook return a POJO instead of the <code>query</code> promise. This resolves immediately so the component is rendered immediately.
+</p>
+
+<p>
+  In the <code>attributes</code> hook, we pass <code>query</code> to the component so we have the loading state (whether data is loading or loaded). We also retrieve loaded posts from the store and pass it as <code>posts</code> so any previously loaded posts can be instantly displayed.
+</p>
+
+<p>
+  We also chain <code>refreshAttributes()</code> after <code>query</code> resolves, which calls the <code>attributes</code> hook again, thus updating <code>posts</code> with any newly fetched data.
+</p>
+
+{{#code-block title="posts-page/template.hbs" custom=true}}
+<code class="hbs">&lt;h1&gt;Posts matching "&#123;&#123;@route.search&#125;&#125;&quot;&lt;/h1&gt;
+
+&#123;&#123;!-- Show loading bar if loading or updating from API --&#125;&#125;
+&#123;&#123;#if @route.query.isPending&#125;&#125;
+  &#123;&#123;loading-bar&#125;&#125;
+&#123;&#123;/if&#125;&#125;
+
+&#123;&#123;!-- Display any already loaded posts --&#125;&#125;
+&#123;&#123;#if @route.posts.length&#125;&#125;
+  &#123;&#123;#each @route.posts as |post|&#125;&#125;
+    &#123;&#123;post-item post=post&#125;&#125;
+  &#123;&#123;/each&#125;&#125;
+
+&#123;&#123;!-- Store is empty, but loading from API --&#125;&#125;
+</code>
+<code class="no-highlight hljs"><span class="hljs-template-tag">&#123;&#123;<span class="hljs-name"><span class="hljs-builtin-name">else if</span></span> @route.query.isPending&#125;&#125;</span>
+</code>
+<code class="hbs">  &#123;&#123;loading-placeholders&#125;&#125;
+
+&#123;&#123;!-- Finished loading but no posts --&#125;&#125;
+</code>
+<code class="no-highlight hljs"><span class="hljs-template-tag">&#123;&#123;<span class="hljs-name"><span class="hljs-builtin-name">else</span></span>&#125;&#125;</span>
+</code>
+<code class="hbs">  &#123;&#123;blank-slate&#125;&#125;
+&#123;&#123;/if&#125;&#125;
+
+&lt;button onclick=&#123;&#123;@route.actions.clearSearch&#125;&#125;&gt;Reset&lt;/button&gt;
+</code>{{!
+}}{{/code-block}}
+
+<h2 id="evaluation">Evaluation</h2>
+
+<p>
+  WIP
+</p>
+
+
+<footer>
+  {{link-to 'Comparison with Classic Ember' 'vs-classic' class="back"}}
+</footer>

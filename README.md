@@ -12,7 +12,7 @@ This was originally based on the [Routable Components RFC](https://github.com/ef
 
 ## Demo / Docs
 
-For more info, see the [interactive docs site](), which uses ember-component-routes.
+For more info, see the [interactive docs site](https://wongpeiyi.github.io/ember-component-routes/), which uses ember-component-routes.
 
 ## Installation & Compatibility
 

@@ -1,0 +1,13 @@
+{{#if title}}
+  <div class="code-block__title"><pre>{{title}}</pre></div>
+{{/if}}
+
+<div class="code-block__numbers"><pre></pre></div>
+
+<div class="code-block__code">
+  {{#if custom}}
+    <pre>{{yield}}</pre>
+  {{else}}
+    <pre><code class="{{type}}">{{yield}}</code></pre>
+  {{/if}}
+</div>

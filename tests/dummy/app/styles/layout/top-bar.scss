@@ -1,0 +1,37 @@
+.top-bar {
+  background: linear-gradient(135deg, #473D7A 33%, #795BA3 95%);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  z-index: 3;
+
+  h1 a {
+    font-size: $f-2;
+    font-weight: 300;
+    line-height: 72px;
+    color: #fff;
+    float: left;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+}
+
+.top-bar__links {
+  float: right;
+  a {
+    transition: opacity 0.1s ease-out;
+    display: inline-block;
+    line-height: 35px;
+    color: #fff;
+    margin: 20px;
+    opacity: 0.85;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}

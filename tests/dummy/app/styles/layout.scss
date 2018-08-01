@@ -1,0 +1,59 @@
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin-top: 100px;
+}
+
+.container {
+  @include clearfix;
+  margin: 0 auto;
+  width: 1080px;
+  position: relative;
+}
+
+footer {
+  @include clearfix;
+  margin: 72px 0 48px;
+  padding-top: 24px;
+  border-top: 1px solid #d9d9d9;
+}
+
+footer a {
+  display: inline-block;
+  padding: 7px 0 18px;
+
+  &:before,
+  &:after {
+    transition: all 0.15s ease-in-out;
+    transform: scale(0.7, 1.1);
+    display: inline-block;
+  }
+
+  &:first-child {
+    &:before {
+      content: "<";
+      margin-right: 8px;
+    }
+    &:hover:before {
+      transform: scale(0.7, 1.1) translateX(-10px);
+    }
+  }
+
+  &:only-child:not(.back),
+  &:nth-child(2) {
+    float: right;
+    &:before {
+      content: none;
+    }
+    &:after {
+      content: ">";
+      margin-left: 8px;
+    }
+    &:hover:after {
+      transform: scale(0.7, 1.1) translateX(10px);
+    }
+  }
+}

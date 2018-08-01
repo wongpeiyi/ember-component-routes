@@ -1,0 +1,132 @@
+<h1>Comparison with Classic Ember</h1>
+
+<p>
+  This example shows the simplification <strong>ember-component-routes</strong> can potentially provide. The reduction in number of lines is not too important; what matters more is having less files, less layers and less objects to deal with.
+</p>
+
+<h2 id="classic-ember">Classic Ember</h2>
+
+{{#code-block type="js" title="posts/route.js"}}
+import Route from '@ember/routing/route';
+
+export default Route.extend({
+
+  queryParams: {
+    page: {
+      refreshModel: true,
+      as: 'p'
+    }
+  },
+
+  model({ page }) {
+    return this.store.query('post', { page });
+  },
+
+  actions: {
+    reload() {
+      this.refresh();
+    }
+  }
+});
+{{/code-block}}
+
+{{#code-block type="js" title="posts/controller.js"}}
+<span class="code-block__minus">import Controller from '@ember/controller';
+
+export default Controller.extend({
+  queryParams: ['page'],
+  page: null,
+
+  actions: {
+    reload() {
+      this.send('reload');
+    }
+  }
+});</span>
+{{/code-block}}
+
+{{#code-block type="htmlbars" title="posts/template.hbs"}}
+<span class="code-block__minus">&#123;&#123;posts-page
+  posts=model
+  page=page
+  reload=(action 'reload')
+&#125;&#125;</span>
+{{/code-block}}
+
+{{#code-block type="hbs" title="posts-page/template.hbs"}}
+&lt;h1&gt;Posts (&#123;&#123;@page&#125;&#125;)&lt;/h1&gt;
+
+&#123;&#123;#each @posts as |post|&#125;&#125;
+  &#123;&#123;post-item post=post&#125;&#125;
+&#123;&#123;/each&#125;&#125;
+
+&lt;button onclick=&#123;&#123;@reload&#125;&#125;&gt;Reload&lt;/button&gt;
+{{/code-block}}
+
+<p>
+  <em>Note:</em> Although you could get away without a <code>posts-page</code> component template here, most non-trivial apps would typically require components for lifecycle hooks, setting non-persistent UI state, or just for consistency.
+</p>
+
+{{!-- component-routes --}}
+
+<h2 id="component-routes">Component Routes</h2>
+
+<p>
+  Using <strong>ember-component-routes</strong>, we have a slightly fatter route file in return for removing the controller file and layer, and potentially one less template file.
+</p>
+
+<p>
+  We also have consistency in the view layer. In classic Ember, we have two types of views (components and controller templates), which differ significantly in behaviour but do not have substantially different use cases to warrant it &mdash; mainly just legacy reasons.
+</p>
+
+<p>
+  <strong>ember-component-routes</strong> attempts to simplify Ember apps by removing the need for this difference:
+</p>
+
+{{#code-block type="js" title="posts/route.js"}}
+import { ComponentRoute } from 'ember-component-routes';
+
+export default ComponentRoute.extend({
+
+  queryParams: {
+    page: {
+      refreshModel: true,
+      as: 'p'
+    }
+  },
+
+  model({ page }) {
+    return this.store.query('post', { page });
+  },
+<span class="code-block__plus">
+  attributes(posts, { page }, actions) {
+    return { posts, page, actions };
+  },
+
+  renderComponents() {
+    this.renderComponent('posts-page');
+  },
+</span>
+  actions: {
+    reload() {
+      this.refresh();
+    }
+  }
+});
+{{/code-block}}
+
+{{#code-block type="hbs" title="posts-page/template.hbs"}}
+&lt;h1&gt;Posts (&#123;&#123;<span class="code-block__plus">@route.</span>page&#125;&#125;)&lt;/h1&gt;
+
+&#123;&#123;#each <span class="code-block__plus">@route.</span>posts as |post|&#125;&#125;
+  &#123;&#123;post-item post=post&#125;&#125;
+&#123;&#123;/each&#125;&#125;
+
+&lt;button onclick=&#123;&#123;<span class="code-block__plus">@route.actions.</span>reload&#125;&#125;&gt;Reload&lt;/button&gt;
+{{/code-block}}
+
+
+<footer>
+  {{link-to 'Animations' 'animations'}}
+  {{link-to 'Skeleton Loading UI' 'skeleton-loading'}}
+</footer>

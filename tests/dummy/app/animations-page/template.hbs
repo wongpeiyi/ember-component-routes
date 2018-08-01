@@ -1,0 +1,241 @@
+<h1>Animations</h1>
+
+<p>
+  <strong>ember-component-routes</strong> gives you the ability to craft promise-aware animations on route transitions. The goal of this section is to demonstrate how this component-based approach can be simple, yet powerful and flexible.
+</p>
+
+<p>
+  This section will walk you through crafting different animations on route transitions using <a href="http://velocityjs.org" target="_blank">VelocityJS</a>. You can use any animation library, or even pure CSS transitions, though a promise-based animation library makes things more convenient.
+</p>
+
+
+{{!-- fade-to-white --}}
+
+<h2 id="fade-to-white">Fade To White</h2>
+
+{{component-outlet "white" class="animation-box"}}
+
+<p>
+  To achieve this, we create a mixin used by both components rendered by the <code>component-outlet</code>. When the component is rendered, it should immediately fade in from opacity 0 to 1. Before the component is torn down, it should fade out to opacity 0:
+</p>
+
+{{#code-block type="js" title="mixins/fade-to-white.js"}}
+import Mixin from '@ember/object/mixin';
+import { animate } from 'velocity-animate';
+
+export default Mixin.create({
+
+  didRenderComponent() {
+    return animate(this.element, { opacity: [1, 0] });
+  },
+
+  willTeardownComponent() {
+    return animate(this.element, { opacity: 0 });
+  }
+
+});
+{{/code-block}}
+
+<p>
+  Since <code>animate()</code> returns a promise, the outgoing <code>willTeardownComponent</code> must resolve before the incoming component gets rendered &mdash; the fade out must finish before the next component can fade in.
+</p>
+
+<p>
+  Similarly, <code>didRenderComponent</code> must resolve before <code>willTeardownComponent</code> can happen &mdash; the component must fully fade in before it can fade out.
+</p>
+
+
+<h2 id="cross-fade">Cross-Fade</h2>
+
+{{!-- cross-fade-attempt --}}
+
+<p>
+  If we want the animations to happen simultaneously, we can first remove the <code>return</code>. Since no promise is returned, the incoming component will be rendered immediately as soon as the route transition occurs:
+</p>
+
+{{#code-block type="js" title="mixins/cross-fade.js"}}
+import Mixin from '@ember/object/mixin';
+import { animate } from 'velocity-animate';
+
+export default Mixin.create({
+
+  didRenderComponent() {
+    animate(this.element, { opacity: [1, 0] });
+  },
+
+  willTeardownComponent() {
+    animate(this.element, { opacity: 0 });
+  }
+
+});
+{{/code-block}}
+
+
+{{component-outlet "attempt" class="animation-box"}}
+
+<p>
+  However, there is a problem with the fade out &mdash; without a returned promise, the outgoing component is torn down and destroyed instantly, before the fade out can happen.
+</p>
+
+
+{{!-- basic-cross-fade --}}
+
+{{#code-block type="js" numbers=false}}
+willTeardownComponent(toComponent, toRoute, teardown) {
+  animate(this.element, { opacity: 0 })
+    .then(teardown);
+
+  return false;
+}
+{{/code-block}}
+
+<p>
+  To ensure the component does not get destroyed until the fade out is complete, we return <code>false</code> in <code>willTeardownComponent</code>, which prevents the component teardown from happening automatically when the route transitions.
+</p>
+
+<p>
+  We then chain the provided <code>teardown</code> function after the fade out animation, which manually resumes the component teardown process (i.e. <code>willDestroyElement</code>, etc) after the animation completes.
+</p>
+
+{{component-outlet "cross-fade" class="animation-box"}}
+
+
+{{!-- route-dependent --}}
+
+<h2 id="route-dependent">Route-Dependent Animations</h2>
+
+{{component-outlet "route-dependent" class="animation-box"}}
+
+<p>
+  In this example, the middle component (2) should &mdash;
+</p>
+
+<ul>
+  <li>
+    if transiting from 1 &mdash; slide in from right
+  </li>
+  <li>
+    if transiting from 3 &mdash; slide in from left
+  </li>
+  <li>
+    if transiting to 1 &mdash; slide out to right
+  </li>
+  <li>
+    if transiting to 3 &mdash; slide out to left
+  </li>
+</ul>
+
+<p>
+  We can utilise the arguments provided in the component hooks to customise the animation direction. When rendered, we use the provided <code>fromComponent</code> to determine if the outgoing component is 1 or 3:
+</p>
+
+{{#code-block type="js" numbers=false}}
+didRenderComponent(fromComponent) {
+  // If left of the outgoing component, slide in from left (-100%)
+  const start = this._isBefore(fromComponent) ? '-100%' : '100%';
+
+  animate(this.element, { translateX: [0, start] });
+},
+
+_isBefore(componentName) {
+  // True if this component is left of the specified component
+  return this.toString().match('-two') &amp;&amp; componentName.match('-three') ||
+         this.toString().match('-one') &amp;&amp; componentName.match('-two');
+}
+{{/code-block}}
+
+<p>
+  When tearing down, we use <code>toComponent</code> to determine if the incoming component is 1 or 3:
+</p>
+
+{{#code-block type="js" numbers=false}}
+willTeardownComponent(toComponent, toRoute, teardown) {
+  // If left of the incoming component, slide out to left (-100%)
+  const end = this._isBefore(toComponent) ? '-100%' : '100%';
+
+  animate(this.element, { translateX: end })
+    .then(teardown);
+
+  return false;
+}
+{{/code-block}}
+
+<p>
+  We also make sure to return <code>false</code> and manually tear down the component only after the teardown animation completes.
+</p>
+
+<p>
+  Finally, we can check for the presence of <code>fromComponent</code> on the initial route transition, to prevent an animation on first page load. We do the same for <code>toComponent</code> to handle the transition where the entire <code>component-outlet</code> is tearing down:
+</p>
+
+{{#code-block type="js" numbers=false}}
+didRenderComponent(fromComponent) {
+  // No animation on first page load
+  if (!fromComponent) {
+    return;
+  }
+  // ...
+}
+{{/code-block}}
+
+{{#code-block type="js" numbers=false}}
+willTeardownComponent(toComponent, toRoute, teardown) {
+  // No animation if tearing down component-outlet
+  if (!toComponent) {
+    return;
+  }
+  // ...
+}
+{{/code-block}}
+
+<p>
+  Here is the entire code for the <code>route-dependent</code> mixin:
+</p>
+
+{{#code-block type="js" title='route-dependent.js'}}
+import Mixin from '@ember/object/mixin';
+import { animate } from 'velocity-animate';
+
+export default Mixin.create({
+
+  didRenderComponent(fromComponent) {
+    // No animation on first page load
+    if (!fromComponent) {
+      return;
+    }
+
+    // If left of the outgoing component, slide in from left (-100%)
+    const start = this._isBefore(fromComponent) ? '-100%' : '100%';
+
+    animate(this.element, { translateX: [0, start] });
+  },
+
+  willTeardownComponent(toComponent, toRoute, teardown) {
+    // No animation if tearing down component-outlet
+    if (!toComponent) {
+      return;
+    }
+
+    // If left of the incoming component, slide out to left (-100%)
+    const end = this._isBefore(toComponent) ? '-100%' : '100%';
+
+    animate(this.element, { translateX: end })
+      .then(teardown);
+
+    return false;
+  },
+
+  _isBefore(componentName) {
+    // True if this component is left of the specified component
+    return this.toString().match('-two') &amp;&amp; componentName.match('-three') ||
+           this.toString().match('-one') &amp;&amp; componentName.match('-two');
+  }
+
+});
+{{/code-block}}
+
+
+<footer>
+  {{link-to 'Usage: Component Hooks' 'component-hooks'}}
+  {{link-to 'Comparison with Classic Ember' 'vs-classic'}}
+</footer>

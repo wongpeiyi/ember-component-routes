@@ -1,0 +1,167 @@
+<div>
+  {{link-to 'Overview' 'index'
+    (query-params anchor=undefined)
+    current-when='index'
+  }}
+
+  <h1>Usage</h1>
+
+  {{link-to 'Rendering Components' 'rendering'
+    (query-params anchor=undefined)
+    current-when='rendering'
+  }}
+
+  {{link-to 'Passing Attributes & Actions' 'attributes'
+    (query-params anchor=undefined)
+    current-when='attributes'
+  }}
+
+  {{link-to 'Query Params' 'query-params'
+    (query-params anchor=undefined)
+    current-when='query-params'
+  }}
+
+  {{link-to 'Component Hooks' 'component-hooks'
+    (query-params anchor=undefined)
+    current-when='component-hooks'
+  }}
+
+  <h1>Examples</h1>
+
+  {{link-to 'Animations' 'animations'
+    (query-params anchor=undefined)
+    current-when='animations'
+  }}
+
+  {{#if onRoute.animations}}
+    <ul>
+      <li>
+        {{link-to 'Fade To White' 'animations'
+          (query-params anchor='fade-to-white')
+        }}
+      </li>
+      <li>
+        {{link-to 'Cross-Fade' 'animations'
+          (query-params anchor='cross-fade')
+        }}
+      </li>
+      <li>
+        {{link-to 'Route-Dependent Animations' 'animations'
+          (query-params anchor='route-dependent')
+        }}
+      </li>
+    </ul>
+  {{/if}}
+
+  {{link-to 'Comparison with Classic Ember' 'vs-classic'
+    (query-params anchor=undefined)
+    current-when='vs-classic'
+  }}
+
+  {{#if onRoute.vs-classic}}
+    <ul>
+      <li>
+        {{link-to 'Classic Ember' 'vs-classic'
+          (query-params anchor='classic-ember')
+        }}
+      </li>
+      <li>
+        {{link-to 'Component Routes' 'vs-classic'
+          (query-params anchor='component-routes')
+        }}
+      </li>
+    </ul>
+  {{/if}}
+
+  {{link-to 'Skeleton Loading UI' 'skeleton-loading'
+    (query-params anchor=undefined)
+    current-when='skeleton-loading'
+  }}
+
+  {{#if onRoute.skeleton-loading}}
+    <ul>
+      <li>
+        {{link-to 'Desired Behaviour' 'skeleton-loading'
+          (query-params anchor='desired-behaviour')
+        }}
+      </li>
+      <li>
+        {{link-to 'Implementation' 'skeleton-loading'
+          (query-params anchor='implementation')
+        }}
+      </li>
+      <li>
+        {{link-to 'Evaluation' 'skeleton-loading'
+          (query-params anchor='evaluation')
+        }}
+      </li>
+    </ul>
+  {{/if}}
+
+  <h1>API Reference</h1>
+
+  {{link-to 'ComponentRoute' 'api-component-route'
+    (query-params anchor=undefined)
+    current-when='api-component-route'
+  }}
+
+  {{#if onRoute.api-component-route}}
+    <ul>
+      <li>
+        {{link-to 'attributes()' 'api-component-route'
+          (query-params anchor='attributes')
+        }}
+      </li>
+      <li>
+        {{link-to 'currentAttributes' 'api-component-route'
+          (query-params anchor='currentAttributes')
+        }}
+      </li>
+      <li>
+        {{link-to 'queryParams' 'api-component-route'
+          (query-params anchor='queryParams')
+        }}
+      </li>
+      <li>
+        {{link-to 'refreshAttributes()' 'api-component-route'
+          (query-params anchor='refreshAttributes')
+        }}
+      </li>
+      <li>
+        {{link-to 'renderComponents()' 'api-component-route'
+          (query-params anchor='renderComponents')
+        }}
+      </li>
+      <li>
+        {{link-to 'renderComponent()' 'api-component-route'
+          (query-params anchor='renderComponent')
+        }}
+      </li>
+    </ul>
+  {{/if}}
+
+  {{link-to 'Component' 'api-component'
+    (query-params anchor=undefined)
+    current-when='api-component'
+  }}
+
+  {{#if onRoute.api-component}}
+    <ul>
+      <li>
+        {{link-to 'didRenderComponent()' 'api-component'
+          (query-params anchor='didRenderComponent')
+        }}
+      </li>
+      <li>
+        {{link-to 'didUpdateRouteAttrs()' 'api-component'
+          (query-params anchor='didUpdateRouteAttrs')
+        }}
+      </li>
+      <li>
+        {{link-to 'willTeardownComponent()' 'api-component'
+          (query-params anchor='willTeardownComponent')
+        }}
+      </li>
+    </ul>
+  {{/if}}
+</div>

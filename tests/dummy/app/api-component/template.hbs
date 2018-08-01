@@ -1,0 +1,185 @@
+<h1>Component</h1>
+
+<p>
+  While <strong>ember-component-routes</strong> doesn't export an actual <code>Component</code> class, components rendered by a <code>&#123;&#123;component-outlet&#125;&#125;</code> have two hooks injected into them:
+</p>
+
+{{!-- didRenderComponent --}}
+
+<h2 id="didRenderComponent">
+  didRenderComponent
+  <span class="args">(fromComponent, fromRoute)</span>
+</h2>
+
+<ul class="args-definition">
+  <li>
+    <strong>fromComponent</strong>
+    <em>String</em>
+    <br>
+    Name of previous component rendered in the <code>component-outlet</code>.
+    <br>
+    Is <code>undefined</code> on initial transition (first page load)
+  </li>
+  <li>
+    <strong>fromRoute</strong>
+    <em>String</em>
+    <br>
+    Name of route transitioned from.
+    <br>
+    Is <code>undefined</code> on initial transition (first page load)
+  </li>
+  <li class="args-definition__returns">
+    <strong>Returns</strong>
+    <em>Any | Promise&lt;any&gt;</em>
+    <br>
+    If a promise is returned, the promise must be resolved before the component can be torn down
+  </li>
+</ul>
+
+<p>
+  This hook is called after the <code>component-outlet</code> inserts and renders that component. This is where you would typically define "in" animations, e.g. "fade in" or slide in".
+</p>
+<p>
+  If a promise is returned, subsequent route transitions will wait for the promise to be resolved before the <code>component-outlet</code> can tear down the component (i.e. <code>willTeardownComponent</code>).
+</p>
+
+<p>
+  While awaiting the promise to be resolved, any subsequent route transitions will happen normally (i.e. the URL will change), but the corresponding renders and teardowns by the <code>component-outlet</code> will be enqueued.
+</p>
+
+<p>
+  You can use the <code>fromComponent</code> and <code>fromRoute</code> arguments to customize different behaviour depending on the previous rendered component or route. These will be <code>undefined</code> on the initial transition (first page load).
+</p>
+
+<p>
+  For example:
+</p>
+
+{{#code-block type="js" numbers=false}}
+didRenderComponent(fromComponent) {
+  // No animation on page load
+  if (!fromComponent) {
+    return;
+  }
+
+  // Promise returned – fade in must finish before component can tear down
+  return animate(this.element, { opacity: [1, 0] });
+}
+{{/code-block}}
+
+{{!-- didUpdateRouteAttrs --}}
+
+<h2 id="didUpdateRouteAttrs">
+  didUpdateRouteAttrs
+  <span class="args">()</span>
+</h2>
+
+<p>
+  This hook is called after the <code>component-outlet</code> updates an already rendered component's attributes. It isn't called on the first render, meaning <code>didRenderComponent</code> and <code>didUpdateRouteAttrs</code> will never be called together.
+</p>
+
+<p>
+  This hook can be used to trigger certain behaviour when a route's attributes are updated but the rendered component remains the same, e.g. a change in query params only, or in {{link-to 'application-level attributes' 'attributes' (query-params anchor='application-level')}}.
+</p>
+
+{{!-- willTeardownComponent --}}
+
+<h2 id="willTeardownComponent">
+  willTeardownComponent
+  <span class="args">(toComponent, toRoute, teardown)</span>
+</h2>
+
+<ul class="args-definition">
+  <li>
+    <strong>toComponent</strong>
+    <em>String</em>
+    <br>
+    Name of next component to be rendered in the <code>component-outlet</code>.
+    <br>
+    Is <code>undefined</code> on tearing down <code>component-outlet</code>
+  </li>
+  <li>
+    <strong>toRoute</strong>
+    <em>String</em>
+    <br>
+    Name of route to be transitioned to.
+    <br>
+    Is <code>undefined</code> on tearing down <code>component-outlet</code>
+  </li>
+  <li>
+    <strong>teardown</strong>
+    <em>Function</em>
+    <br>
+    Method to manually destroy the component if <code>false</code> is returned
+  </li>
+  <li class="args-definition__returns">
+    <strong>Returns</strong>
+    <em>Any | Promise&lt;any&gt;</em>
+    <br>
+    If a promise is returned, it must be resolved before the component gets destroyed, and before the next component can render.
+    <br>
+    If <code>false</code> is returned, the component will not be destroyed until the <code>teardown</code> function is called
+  </li>
+</ul>
+
+<p>
+  This hook is called before the <code>component-outlet</code> can render a new component. This is where you would typically define "out" animations, e.g. "fade out" or slide out".
+</p>
+
+<p>
+  By default, the component will be torn down and destroyed (i.e. <code>willDestroyElement</code>, etc) after this hook resolves.
+</p>
+
+<h3>Return value is a Promise</h3>
+
+<p>
+  If a promise is returned, the component will only be destroyed after the promise is resolved. The <code>component-outlet</code> will also wait until the promise is resolved before rendering the next component.
+
+<p>
+  While awaiting the promise to be resolved, any subsequent route transitions will happen normally (i.e. the URL will change), but the corresponding renders and teardowns by the <code>component-outlet</code> will be enqueued.
+</p>
+</p>
+
+<p>
+  For example:
+</p>
+
+{{#code-block type="js" numbers=false}}
+willTeardownComponent() {
+  // Promise returned – fade out must finish before component gets destroyed
+  // and next component can render
+  return animate(this.element, { opacity: 0 });
+}
+{{/code-block}}
+
+<h3>Return value is not a Promise</h3>
+
+<p>
+  If the return value is not a promise, the <code>component-outlet</code> will render the next component immediately. The component will also be destroyed immediately.
+</p>
+
+<h3>Return value is <code>false</code></h3>
+
+<p>
+  In some cases you want to render the next component immediately, without destroying the component until later. This can be done by returning <code>false</code>, and manually calling the provided <code>teardown()</code> function to destroy the component:
+</p>
+
+{{#code-block type="js" numbers=false}}
+willTeardownComponent(toComponent, toRoute, teardown) {
+  animate(this.element, { opacity: 0 })
+    .then(teardown); // Component will destroy after fade out
+
+  // Not a promise – next component will render immediately
+  // False returned – component will not be destroyed immediately
+  return false;
+}
+{{/code-block}}
+
+<p>
+  You can use the <code>toComponent</code> and <code>toRoute</code> arguments to customize different behaviour depending on the next component that will be rendered, or the route that will be transitioned into. These will be undefined if the <code>component-outlet</code> is tearing down (i.e. parent route is deactivating).
+</p>
+
+
+<footer>
+  {{link-to 'ComponentRoute' 'api-component-route' class="back"}}
+</footer>

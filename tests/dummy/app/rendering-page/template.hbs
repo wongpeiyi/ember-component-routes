@@ -1,0 +1,55 @@
+<h1>Rendering Components</h1>
+
+<p>
+  <strong>ember-component-routes</strong> enables you to bypass the controller layer, by specifying a component to render in a <code>ComponentRoute</code>:
+</p>
+
+{{#code-block title="post/route.js"}}
+import { ComponentRoute } from 'ember-component-routes';
+
+export default ComponentRoute.extend({
+
+  renderComponents() {
+    this.renderComponent('post-page');
+  }
+
+});
+{{/code-block}}
+
+<p>
+  Instead of the classic <code>&#123;&#123;outlet&#125;&#125;</code>, use:
+</p>
+
+
+{{#code-block title="application/template.hbs"}}
+&#123;&#123;component-outlet&#125;&#125;
+{{/code-block}}
+
+<p>
+  When the route is entered, the <code>post-page</code> component will be rendered into the application template's <code>component-outlet</code>.
+</p>
+
+<hr>
+
+<p>
+  The hook accepts multiple <code>renderComponent</code> calls, which can target specific outlets by the outlet name, or parent component's name. For example:
+</p>
+
+
+{{#code-block type="js" numbers=false}}
+renderComponents() {
+  this.renderComponent('app-menu', { outlet: 'sidebar' });
+
+  this.renderComponent('post-page', { into: 'parent-page' });
+}
+{{/code-block}}
+
+<p>
+  For more details, view the {{link-to 'API reference' 'api-component-route'}}.
+</p>
+
+
+<footer>
+  {{link-to 'Overview' 'index'}}
+  {{link-to 'Passing Attributes & Actions' 'attributes'}}
+</footer>

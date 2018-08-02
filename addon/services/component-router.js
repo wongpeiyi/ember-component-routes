@@ -61,7 +61,7 @@ export default Service.extend({
     @param {String} outlet Name of the component-outlet to render into
   */
   queueRender(routeName, componentName, attributes, into, outlet) {
-    into = into.replace(/\//g, '.');
+    into = into.replace(/\./g, '/');
 
     const existing = this.get('renderQueue').find((task) => (
       task.routeName === routeName &&
@@ -96,6 +96,8 @@ export default Service.extend({
     @param {String} outlet Name of component-outlet
   */
   connectOutlet(componentOutlet, into, outlet) {
+    into = into.replace(/\./g, '/');
+
     const existing = this.get('connections').findBy('componentOutlet', componentOutlet);
 
     if (existing) {

@@ -47,10 +47,53 @@ export function attributableActions(route) {
   return actions;
 }
 
+/**
+  Returns true if the route is resolved, i.e. has already been transitioned
+  into, and not currently being transitioned into.
+
+  Returns true if there is no currently active transition.
+
+  @function routeIsResolved
+  @param {Ember.Route} route
+  @returns {Boolean}
+*/
+export function routeIsResolved(route) {
+  const { activeTransition } = routerMicrolib(route);
+
+  if (!activeTransition) {
+    return true;
+  }
+
+  return !!activeTransition.handlerInfos
+    .find((info) => (
+      info.isResolved &&
+      route === (
+        info._handler ||
+        info.handler // Ember < 2.4
+      )
+    ));
+}
+
+/**
+  Returns the route's `routerMicrolib` (for compatibility).
+
+  @function routerMicrolib
+  @param {Ember.Route} route
+*/
 export function routerMicrolib(route) {
   const router = route._router ||
     route.router;  // < Ember 3.0
 
   return router._routerMicrolib ||
     router.router; // < Ember 2.13
+}
+
+/**
+  Returns the route's `fullRouteName` (for compatibility).
+
+  @function routeName
+  @param {Ember.Route} route
+*/
+export function routeName(route) {
+  return route.fullRouteName || route.routeName;
 }

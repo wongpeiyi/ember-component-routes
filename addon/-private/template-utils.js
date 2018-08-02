@@ -1,6 +1,27 @@
 import { getOwner } from '@ember/application';
 
 /**
+  Returns the target object (parent component or controller) of a view (for
+  compatibility).
+
+  @function targetObjectOf
+  @param {(Ember.View}
+  @returns {(Ember.Component|Ember.Controller)} Parent object
+*/
+export function targetObjectOf(obj) {
+  let parent = obj._targetObject;
+
+  if (parent) {
+    return parent;
+  }
+
+  // < Ember 2.4
+  parent = obj.parentView;
+
+  return parent.get('controller') || parent;
+}
+
+/**
   Returns the template name for a component, or controller. This is the same
   name used in `renderTemplate` or `renderComponent`.
 

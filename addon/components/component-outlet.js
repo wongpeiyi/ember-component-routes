@@ -1,7 +1,7 @@
 import Component from '@ember/component';
 import layout from '../templates/components/component-outlet';
 import RenderTask from '../-private/render-task';
-import { templateNameFor } from '../-private/template-utils';
+import { templateNameFor, targetObjectOf } from '../-private/template-utils';
 import { A } from '@ember/array';
 import { computed} from '@ember/object';
 import { inject } from '@ember/service';
@@ -23,7 +23,7 @@ const ComponentOutlet = Component.extend({
     @private
   */
   _parentTemplateName: computed(function() {
-    return templateNameFor(this._targetObject);
+    return templateNameFor(targetObjectOf(this));
   }),
 
   init() {

@@ -4,10 +4,10 @@ import { VERSION } from '@ember/version';
 import { bind, run as emberRun } from '@ember/runloop';
 import { Promise, resolve } from 'rsvp';
 
-const version = +VERSION.replace(/\.\d+$/, '');
+const [major, minor] = VERSION.split('.');
 
 // Wrap in runloop for < Ember 2.16 and in testing mode
-const run = version >= 2.16 ?
+const run = +major >= 2 && +minor >= 16 ?
   (fn) => fn() :
   (fn) => Ember.testing ? emberRun(fn) : fn();
 
@@ -112,7 +112,7 @@ export default EmberObject.extend({
   async updateAttributes(attributes) {
     await this.registerPromise;
 
-    this.set('attributes', attributes);
+    run(() => this.set('attributes', attributes));
 
     this.didUpdateRouteAttrs();
   },

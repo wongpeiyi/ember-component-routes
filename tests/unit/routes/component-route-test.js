@@ -24,7 +24,7 @@ module('Unit | Route | component-route', function(hooks) {
 
     const route = this.owner.lookup('route:foo');
 
-    route.setup();
+    route.setup({});
 
     assert.equal(route.currentAttributes.foo, 'bar');
   });
@@ -40,7 +40,7 @@ module('Unit | Route | component-route', function(hooks) {
 
     const route = this.owner.lookup('route:foo');
 
-    route.setup();
+    route.setup({});
   });
 
   // #attributes
@@ -58,7 +58,7 @@ module('Unit | Route | component-route', function(hooks) {
 
     route.context = { foo: 'bar' };
 
-    route.setup();
+    route.setup({});
   });
 
   test('attributes hook receives result of #paramsFor as second argument', function(assert) {
@@ -74,7 +74,7 @@ module('Unit | Route | component-route', function(hooks) {
 
     route.paramsFor = () => ({ foo: 'bar' });
 
-    route.setup();
+    route.setup({});
   });
 
   test('attributes hook receives bound custom actions as third argument', function(assert) {
@@ -100,7 +100,7 @@ module('Unit | Route | component-route', function(hooks) {
 
     const route = this.owner.lookup('route:foo');
 
-    route.setup();
+    route.setup({});
   });
 
   // queryParams

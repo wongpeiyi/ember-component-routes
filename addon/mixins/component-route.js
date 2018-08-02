@@ -5,7 +5,12 @@ import { assign } from '@ember/polyfills';
 import { inject } from '@ember/service';
 import { once } from '@ember/runloop';
 import { typeOf } from '@ember/utils';
-import { routerMicrolib, attributableActions, parentRoute } from '../-private/router-utils';
+import {
+  routeName,
+  attributableActions,
+  parentRoute,
+  routeIsResolved
+} from '../-private/router-utils';
 
 export default Mixin.create({
   componentRouter: inject(),
@@ -18,7 +23,7 @@ export default Mixin.create({
     @override
   */
   renderTemplate() {
-    if (this.fullRouteName === 'application') {
+    if (routeName(this) === 'application') {
       return this._super();
     }
   },
@@ -44,7 +49,7 @@ export default Mixin.create({
     @override
   */
   deactivate() {
-    this.get('componentRouter').removeRendersBy(this.fullRouteName);
+    this.get('componentRouter').removeRendersBy(routeName(this));
 
     return this._super(...arguments);
   },
@@ -62,11 +67,11 @@ export default Mixin.create({
   refreshAttributes() {
     this.currentAttributes = this.attributes(
       this.context,
-      this.paramsFor(this.fullRouteName),
+      this.paramsFor(routeName(this)),
       attributableActions(this)
     );
 
-    if (this.fullRouteName === 'application') {
+    if (routeName(this) === 'application') {
       this.get('componentRouter').updateAppAttributes(this.currentAttributes);
     } else {
       this.renderComponents();
@@ -98,7 +103,7 @@ export default Mixin.create({
     @public
   */
   renderComponents() {
-    this.renderComponent(this.fullRouteName);
+    this.renderComponent(routeName(this));
   },
 
   /**
@@ -123,7 +128,7 @@ export default Mixin.create({
     const outlet = opts.outlet || 'main';
 
     this.get('componentRouter').queueRender(
-      this.fullRouteName, componentName, this.currentAttributes, into, outlet
+      routeName(this), componentName, this.currentAttributes, into, outlet
     );
   },
 
@@ -225,13 +230,7 @@ export default Mixin.create({
         changed.hasOwnProperty(urlKey) || removed.hasOwnProperty(urlKey)
       ));
 
-      const { activeTransition } = routerMicrolib(this);
-
-      // This route is active with no change in positional params
-      const routeIsResolved = !activeTransition || activeTransition.handlerInfos
-        .find((info) => info.isResolved && info._handler === this);
-
-      if (routeQpsChanged && routeIsResolved) {
+      if (routeQpsChanged && routeIsResolved(this)) {
         once(this, 'queryParamsDidOnlyChange');
       }
 

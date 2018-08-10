@@ -72,11 +72,11 @@ const ComponentOutlet = Component.extend({
   willDestroyElement() {
     this._super(...arguments);
 
-    this.get('componentRouter').disconnectOutlet(this);
+    this._disconnectFromRouter();
   },
 
   /**
-    Enqueues a `renderTask` and chains it to the end of the `renderPromise`.
+    Called by the component-router when there is a matching render.
 
     @method renderComponent
     @public
@@ -85,29 +85,11 @@ const ComponentOutlet = Component.extend({
     @param {Object} attributes
   */
   renderComponent(componentName, routeName, attributes) {
-    const lastTask = this.get('renderTasks.lastObject');
-
-    if (lastTask) {
-      const lastRouteName = lastTask.get('routeName');
-      const lastComponentName = lastTask.get('componentName');
-
-      // Update attributes if only attributes changed and not already tearing down
-      if (
-        routeName === lastRouteName &&
-        componentName === lastComponentName &&
-        !lastTask.get('tearingdown')
-      ) {
-        lastTask.updateAttributes(attributes);
-
-        return;
-      }
-
-      // Teardown component of parent route if transiting to child route since
-      // parent route is not deactivated
-      if (routeName.match(new RegExp(`^${lastRouteName}\\.`))) {
-        this.teardownComponent(lastComponentName, lastRouteName);
-      }
+    if (this._updateLastTask(componentName, routeName, attributes)) {
+      return;
     }
+
+    this._teardownLastTaskIfParentRoute(routeName);
 
     const task = RenderTask.create({
       componentName,
@@ -136,9 +118,9 @@ const ComponentOutlet = Component.extend({
   },
 
   /**
-    Connects to the `component-router` to find matching route render tasks.
+    Connects to the component-router to find matching route render tasks.
 
-    @method connectToRouter
+    @method _connectToRouter
     @private
   */
   _connectToRouter() {
@@ -150,7 +132,17 @@ const ComponentOutlet = Component.extend({
   },
 
   /**
-    After components are rendered, calls `registerHooks` on the matching
+    Disconnects from the component-router.
+
+    @method _disconnectFromRouter
+    @private
+  */
+  _disconnectFromRouter() {
+    this.get('componentRouter').disconnectOutlet(this);
+  },
+
+  /**
+    After components are rendered, calls #registerHooks on the matching
     `renderTask`.
 
     @method _registerHooks
@@ -167,6 +159,54 @@ const ComponentOutlet = Component.extend({
   },
 
   /**
+    Updates the last `renderTask` in queue instead of enqueuing a new one if
+    it has the same properties and is not already tearing down.
+
+    @method _updateLastTask
+    @private
+    @param {String} componentName
+    @param {String} routeName
+    @param {Object} attributes
+  */
+  _updateLastTask(componentName, routeName, attributes) {
+    const lastTask = this.get('renderTasks.lastObject');
+
+    if (
+      lastTask &&
+      !lastTask.get('tearingdown') &&
+      routeName === lastTask.get('routeName') &&
+      componentName === lastTask.get('componentName')
+    ) {
+      lastTask.updateAttributes(attributes);
+
+      return true;
+    }
+  },
+
+  /**
+    Teardown last `renderTask` if is from a parent route of the new task, since
+    the route is not deactivated.
+
+    @method _teardownLastTaskIfParentRoute
+    @private
+    @param {String} parentRouteName
+  */
+  _teardownLastTaskIfParentRoute(parentRouteName) {
+    const lastTask = this.get('renderTasks.lastObject');
+
+    if (!lastTask) {
+      return;
+    }
+
+    const lastComponentName = lastTask.get('componentName');
+    const lastRouteName = lastTask.get('routeName');
+
+    if (parentRouteName.match(new RegExp(`^${lastRouteName}\\.`))) {
+      this.teardownComponent(lastComponentName, lastRouteName);
+    }
+  },
+
+  /**
     Enqueues a `renderTask` by chaining its #perform method to the end of
     the `renderPromise`. After the task renders and is torn down, it is
     removed from `renderTasks`.
@@ -177,11 +217,11 @@ const ComponentOutlet = Component.extend({
     @param {String} routeName
   */
   _enqueueTask(task) {
-    this.get('renderTasks').pushObject(task);
-
     if (task.get('rendered')) {
       return;
     }
+
+    this.get('renderTasks').pushObject(task);
 
     this.set('renderPromise', (async () => {
       await this.get('renderPromise');

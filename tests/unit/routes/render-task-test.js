@@ -11,7 +11,7 @@ module('Unit | render-task', function(hooks) {
   test('#registerHooks binds hooks', function(assert) {
     assert.expect(6);
 
-    const task = RenderTask.create();
+    const task = new RenderTask({});
 
     const component = {
       didRenderComponent() {
@@ -38,17 +38,17 @@ module('Unit | render-task', function(hooks) {
   });
 
   test('#registerHooks sets `registered` flag', function(assert) {
-    const task = RenderTask.create();
+    const task = new RenderTask({});
 
     task.registerHooks({});
 
-    assert.ok(task.get('registered'));
+    assert.ok(task.registered);
   });
 
   test('#registerHooks resolves `registerPromise`', async function(assert) {
     assert.expect(1);
 
-    const task = RenderTask.create();
+    const task = new RenderTask({});
 
     task.registerHooks({});
 
@@ -63,7 +63,7 @@ module('Unit | render-task', function(hooks) {
   test('#perform calls hooks in order', function(assert) {
     assert.expect(9);
 
-    const task = RenderTask.create();
+    const task = new RenderTask({});
     let step = 0;
 
     task.registerPromise.then(() => {
@@ -82,14 +82,14 @@ module('Unit | render-task', function(hooks) {
       step += 1;
       assert.equal(step, 3, `Resolve step 3`);
       assert.ok(true, 'willTeardownComponent resolved');
-      assert.ok(task.get('tearingdown'));
+      assert.ok(task.tearingdown);
     };
 
     task.perform([task]).then(() => {
-      assert.notOk(task.get('rendered'));
+      assert.notOk(task.rendered);
     });
 
-    assert.ok(task.get('rendered'));
+    assert.ok(task.rendered);
 
     task.resolveRegister();
     task.resolveTeardown();
@@ -98,7 +98,7 @@ module('Unit | render-task', function(hooks) {
   test('#perform doesnt teardown until manually called if `willTeardownComponent` returns false', async function(assert) {
     assert.expect(2);
 
-    const task = RenderTask.create();
+    const task = new RenderTask({});
 
     let teardownFn;
 
@@ -114,18 +114,18 @@ module('Unit | render-task', function(hooks) {
 
     await task.perform([task]);
 
-    assert.ok(task.get('rendered'));
+    assert.ok(task.rendered);
 
     teardownFn();
 
-    assert.notOk(task.get('rendered'));
+    assert.notOk(task.rendered);
   });
 
   test('#perform passes previous / next task properties in hooks', async function(assert) {
     assert.expect(4);
 
     const tasks = A([1, 2, 3].map((i) => {
-      const task = RenderTask.create({
+      const task = new RenderTask({
         componentName: `component${i}`,
         routeName: `route${i}`
       });
@@ -163,14 +163,14 @@ module('Unit | render-task', function(hooks) {
   test('#updateAttributes sets `attributes` and calls hook after registerPromise is resolved', function(assert) {
     assert.expect(2);
 
-    const task = RenderTask.create();
+    const task = new RenderTask({});
 
     task.didUpdateRouteAttrs = () => {
       assert.ok(true, 'didUpdateRouteAttrs called');
     }
 
     task.updateAttributes({ foo: 'bar' }).then(() => {
-      assert.equal(task.get('attributes.foo'), 'bar');
+      assert.equal(task.attributes.foo, 'bar');
     });
 
     task.resolveRegister();

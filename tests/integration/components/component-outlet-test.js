@@ -3,7 +3,7 @@ import { setupRenderingTest } from 'ember-qunit';
 import { render } from '@ember/test-helpers';
 import hbs from 'htmlbars-inline-precompile';
 import Component from '@ember/component';
-import { next } from '@ember/runloop';
+import { run, next } from '@ember/runloop';
 
 module('Integration | Component | component-outlet', function(hooks) {
   setupRenderingTest(hooks);
@@ -12,7 +12,11 @@ module('Integration | Component | component-outlet', function(hooks) {
     this.subject = () => {
       const viewRegistry = this.owner.lookup('-view-registry:main');
 
-      return viewRegistry[Object.keys(viewRegistry)[0]];
+      const subjectId = Object.keys(viewRegistry).find((id) => (
+        viewRegistry[id]._debugContainerKey === 'component:component-outlet'
+      ));
+
+      return viewRegistry[subjectId];
     };
   });
 
@@ -77,7 +81,7 @@ module('Integration | Component | component-outlet', function(hooks) {
 
       const subject = this.subject();
 
-      subject.renderComponent('x-foo', 'index', {});
+      run(() => subject.renderComponent('x-foo', 'index', {}));
 
       assert.equal(subject.get('renderTasks.length'), 1);
 
@@ -85,8 +89,8 @@ module('Integration | Component | component-outlet', function(hooks) {
 
       await task.registerPromise;
 
-      assert.ok(task.get('rendered'), 'task is performed');
-      assert.ok(task.get('registered'), 'task is registered');
+      assert.ok(task.rendered, 'task is performed');
+      assert.ok(task.registered, 'task is registered');
       assert.ok(this.element.querySelector('#foo'), 'component is rendered');
     });
 
@@ -99,8 +103,10 @@ module('Integration | Component | component-outlet', function(hooks) {
 
       const subject = this.subject();
 
-      subject.renderComponent('x-foo', 'index', {});
-      subject.renderComponent('x-bar', 'index', {});
+      run(() => {
+        subject.renderComponent('x-foo', 'index', {});
+        subject.renderComponent('x-bar', 'index', {});
+      });
 
       assert.equal(subject.get('renderTasks.length'), 2);
 
@@ -108,12 +114,12 @@ module('Integration | Component | component-outlet', function(hooks) {
 
       await task1.registerPromise;
 
-      assert.ok(task1.get('rendered'), 'task1 is performed');
-      assert.ok(task1.get('registered'), 'task1 is registered');
+      assert.ok(task1.rendered, 'task1 is performed');
+      assert.ok(task1.registered, 'task1 is registered');
       assert.ok(this.element.querySelector('#foo'), 'component x-foo is rendered');
 
-      assert.notOk(task2.get('rendered'), 'task2 is not yet performed');
-      assert.notOk(task2.get('registered'), 'task2 is not yet registered');
+      assert.notOk(task2.rendered, 'task2 is not yet performed');
+      assert.notOk(task2.registered, 'task2 is not yet registered');
       assert.notOk(this.element.querySelector('#bar'), 'component x-bar is not rendered');
 
       task1.resolveTeardown();
@@ -122,8 +128,8 @@ module('Integration | Component | component-outlet', function(hooks) {
 
       assert.notOk(this.element.querySelector('#foo'), 'component x-foo is unrendered');
 
-      assert.ok(task2.get('rendered'), 'task2 is performed');
-      assert.ok(task2.get('registered'), 'task2 is registered');
+      assert.ok(task2.rendered, 'task2 is performed');
+      assert.ok(task2.registered, 'task2 is registered');
       assert.ok(this.element.querySelector('#bar'), 'component x-bar is rendered');
 
       this.owner.application.unregister('component:x-bar');
@@ -136,21 +142,21 @@ module('Integration | Component | component-outlet', function(hooks) {
 
       const subject = this.subject();
 
-      subject.renderComponent('x-foo', 'index', { count: 1 });
+      run(() => subject.renderComponent('x-foo', 'index', { count: 1 }));
 
       assert.equal(subject.get('renderTasks.length'), 1);
 
       const [task] = subject.get('renderTasks');
 
-      assert.equal(task.get('attributes.count'), 1);
+      assert.equal(task.attributes.count, 1);
 
       await task.registerPromise;
 
       task.didUpdateRouteAttrs = () => {
-        assert.equal(task.get('attributes.count'), 2);
+        assert.equal(task.attributes.count, 2);
       };
 
-      subject.renderComponent('x-foo', 'index', { count: 2 });
+      run(() => subject.renderComponent('x-foo', 'index', { count: 2 }));
 
       assert.equal(subject.get('renderTasks.length'), 1);
     });
@@ -160,13 +166,13 @@ module('Integration | Component | component-outlet', function(hooks) {
 
       const subject = this.subject();
 
-      subject.renderComponent('x-foo', 'index', { count: 1 });
+      run(() => subject.renderComponent('x-foo', 'index', { count: 1 }));
 
       const [task] = subject.get('renderTasks');
 
       await task.registerPromise;
 
-      subject.renderComponent('x-foo', 'another-route', { count: 2 });
+      run(() => subject.renderComponent('x-foo', 'another-route', { count: 2 }));
 
       assert.equal(subject.get('renderTasks.length'), 2);
 
@@ -182,7 +188,7 @@ module('Integration | Component | component-outlet', function(hooks) {
 
       const subject = this.subject();
 
-      subject.renderComponent('x-foo', 'index', { count: 1 });
+      run(() => subject.renderComponent('x-foo', 'index', { count: 1 }));
 
       const [task] = subject.get('renderTasks');
 
@@ -190,7 +196,7 @@ module('Integration | Component | component-outlet', function(hooks) {
 
       task.resolveTeardown();
 
-      subject.renderComponent('x-foo', 'another-route', { count: 2 });
+      run(() => subject.renderComponent('x-foo', 'another-route', { count: 2 }));
 
       assert.equal(subject.get('renderTasks.length'), 2);
     });
@@ -206,13 +212,13 @@ module('Integration | Component | component-outlet', function(hooks) {
 
       const subject = this.subject();
 
-      subject.renderComponent('x-foo', 'foo', {});
+      run(() => subject.renderComponent('x-foo', 'foo', {}));
 
       const [task1] = subject.get('renderTasks');
 
       await task1.registerPromise;
 
-      subject.renderComponent('x-bar', 'foo.index', {});
+      run(() => subject.renderComponent('x-bar', 'foo.index', {}));
 
       assert.equal(subject.get('renderTasks.length'), 2);
 
@@ -220,7 +226,7 @@ module('Integration | Component | component-outlet', function(hooks) {
 
       await task2.registerPromise;
 
-      assert.ok(task1.get('tearingdown'), 'task1 is tearing down');
+      assert.ok(task1.tearingdown, 'task1 is tearing down');
       assert.notOk(this.element.querySelector('#foo'), 'foo is unrendered');
       assert.ok(this.element.querySelector('#bar'), 'bar is rendered');
 
@@ -234,7 +240,7 @@ module('Integration | Component | component-outlet', function(hooks) {
 
       const subject = this.subject();
 
-      subject.renderComponent('x-foo', 'index', {});
+      run(() => subject.renderComponent('x-foo', 'index', {}));
 
       const [task] = subject.get('renderTasks');
 
@@ -246,7 +252,7 @@ module('Integration | Component | component-outlet', function(hooks) {
 
       await subject.get('renderPromise');
 
-      assert.ok(task.get('tearingdown'), 'task is tearing down');
+      assert.ok(task.tearingdown, 'task is tearing down');
 
       next(() => {
         assert.notOk(this.element.querySelector('#foo'), 'component is unrendered');

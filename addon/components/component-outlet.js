@@ -3,7 +3,7 @@ import layout from '../templates/components/component-outlet';
 import RenderTask from '../-private/render-task';
 import { templateNameFor, targetObjectOf } from '../-private/template-utils';
 import { A } from '@ember/array';
-import { computed} from '@ember/object';
+import { computed } from '@ember/object';
 import { inject } from '@ember/service';
 import { scheduleOnce } from '@ember/runloop';
 import { resolve } from 'rsvp';
@@ -91,7 +91,7 @@ const ComponentOutlet = Component.extend({
 
     this._teardownLastTaskIfParentRoute(routeName);
 
-    const task = RenderTask.create({
+    const task = new RenderTask({
       componentName,
       routeName,
       attributes
@@ -152,7 +152,7 @@ const ComponentOutlet = Component.extend({
     for (let component of this.childViews) {
       const task = component.get('_renderTask');
 
-      if (!task.get('registered')) {
+      if (!task.registered) {
         task.registerHooks(component);
       }
     }
@@ -173,9 +173,9 @@ const ComponentOutlet = Component.extend({
 
     if (
       lastTask &&
-      !lastTask.get('tearingdown') &&
-      routeName === lastTask.get('routeName') &&
-      componentName === lastTask.get('componentName')
+      !lastTask.tearingdown &&
+      routeName === lastTask.routeName &&
+      componentName === lastTask.componentName
     ) {
       lastTask.updateAttributes(attributes);
 
@@ -198,11 +198,8 @@ const ComponentOutlet = Component.extend({
       return;
     }
 
-    const lastComponentName = lastTask.get('componentName');
-    const lastRouteName = lastTask.get('routeName');
-
-    if (parentRouteName.match(new RegExp(`^${lastRouteName}\\.`))) {
-      this.teardownComponent(lastComponentName, lastRouteName);
+    if (parentRouteName.match(new RegExp(`^${lastTask.routeName}\\.`))) {
+      this.teardownComponent(lastTask.componentName, lastTask.routeName);
     }
   },
 
@@ -217,7 +214,7 @@ const ComponentOutlet = Component.extend({
     @param {String} routeName
   */
   _enqueueTask(task) {
-    if (task.get('rendered')) {
+    if (task.rendered) {
       return;
     }
 

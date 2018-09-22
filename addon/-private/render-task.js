@@ -1,6 +1,6 @@
 import Ember from 'ember';
-import EmberObject from '@ember/object';
 import { VERSION } from '@ember/version';
+import { set } from '@ember/object';
 import { bind, run as emberRun } from '@ember/runloop';
 import { Promise, resolve } from 'rsvp';
 
@@ -11,7 +11,7 @@ const run = +major >= 2 && +minor >= 16 ?
   (fn) => fn() :
   (fn) => Ember.testing ? emberRun(fn) : fn();
 
-export default EmberObject.extend({
+export default class RenderTask {
 
   /**
     Sets up deferred promises and their respective resolve methods
@@ -20,12 +20,19 @@ export default EmberObject.extend({
     @method init
     @override
   */
-  init() {
-    this._super(...arguments);
+  constructor({ componentName, routeName, attributes }) {
+    this.registered = false;
+    this.tearingdown = false;
+
+    this.componentName = componentName;
+    this.routeName = routeName;
+
+    set(this, 'rendered', false);
+    set(this, 'attributes', attributes);
 
     this.registerPromise = new Promise((res) => this.resolveRegister = res);
     this.teardownPromise = new Promise((res) => this.resolveTeardown = res);
-  },
+  }
 
   /**
     Called when the component-outlet #didRender, to connect two new
@@ -51,10 +58,10 @@ export default EmberObject.extend({
     this.didUpdateRouteAttrs = component.didUpdateRouteAttrs ?
       bind(component, 'didUpdateRouteAttrs') : () => {};
 
-    this.set('registered', true);
+    this.registered = true;
 
     this.resolveRegister();
-  },
+  }
 
   /**
     When the component-outlet's `renderPromise` resolves to this task, the
@@ -74,7 +81,7 @@ export default EmberObject.extend({
     let componentName;
     let routeName;
 
-    run(() => this.set('rendered', true));
+    run(() => set(this, 'rendered', true));
 
     await this.registerPromise;
 
@@ -87,7 +94,7 @@ export default EmberObject.extend({
 
     await this.teardownPromise;
 
-    run(() => this.set('tearingdown', true));
+    run(() => this.tearingdown = true);
 
     const nextTask = tasks[tasks.indexOf(this) + 1];
     ({ componentName, routeName } = nextTask || {});
@@ -99,7 +106,7 @@ export default EmberObject.extend({
     if (shouldTeardownNow !== false) {
       run(() => this._teardown());
     }
-  },
+  }
 
   /**
     Sets new attributes on the task and triggers the `didUpdateRouteAttrs`
@@ -112,10 +119,10 @@ export default EmberObject.extend({
   async updateAttributes(attributes) {
     await this.registerPromise;
 
-    run(() => this.set('attributes', attributes));
+    run(() => set(this, 'attributes', attributes));
 
     this.didUpdateRouteAttrs();
-  },
+  }
 
   /**
     Removes the task from the component outlet's template, tearing it down.
@@ -124,8 +131,8 @@ export default EmberObject.extend({
     @private
   */
   _teardown() {
-    this.set('rendered', false);
-  },
+    set(this, 'rendered', false);
+  }
 
   /**
     Removes stale (previous tasks that are no longer rendered) tasks.
@@ -138,9 +145,9 @@ export default EmberObject.extend({
     for (let i = tasks.indexOf(this); i--;) {
       const task = tasks[i];
 
-      if (!task.get('rendered')) {
+      if (!task.rendered) {
         run(() => tasks.removeObject(task));
       }
     }
   }
-});
+}

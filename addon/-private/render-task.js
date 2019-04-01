@@ -1,13 +1,11 @@
 import Ember from 'ember';
-import { VERSION } from '@ember/version';
 import { set } from '@ember/object';
 import { bind, run as emberRun } from '@ember/runloop';
 import { Promise, resolve } from 'rsvp';
-
-const [major, minor] = VERSION.split('.');
+import { versionAbove } from 'ember-component-routes/-private/ember-version';
 
 // Wrap in runloop for < Ember 2.16 and in testing mode
-const run = +major >= 2 && +minor >= 16 ?
+const run = versionAbove('2.16') ?
   (fn) => fn() :
   (fn) => Ember.testing ? emberRun(fn) : fn();
 

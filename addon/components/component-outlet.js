@@ -4,7 +4,7 @@ import RenderTask from '../-private/render-task';
 import { templateNameFor, targetObjectOf } from '../-private/template-utils';
 import { A } from '@ember/array';
 import { computed } from '@ember/object';
-import { inject } from '@ember/service';
+import { inject as service } from '@ember/service';
 import { scheduleOnce } from '@ember/runloop';
 import { resolve } from 'rsvp';
 
@@ -13,7 +13,7 @@ const ComponentOutlet = Component.extend({
 
   outletName: 'main',
 
-  componentRouter: inject(),
+  componentRouter: service(),
 
   /**
     Template name for the component or template containing this

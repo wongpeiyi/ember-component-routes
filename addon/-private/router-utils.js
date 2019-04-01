@@ -1,5 +1,6 @@
+import { getOwner } from '@ember/application';
 import { bind } from '@ember/runloop';
-
+import { versionAbove } from 'ember-component-routes/-private/ember-version';
 /**
   Returns the immediate parent route for a route.
 
@@ -7,12 +8,26 @@ import { bind } from '@ember/runloop';
   @param {Ember.Route} route
   @returns {Ember.Route} Parent route
 */
-export function parentRoute(route) {
+export function parentRouteName(route) {
+  if (versionAbove('3.6')) {
+    const routerService = getOwner(route).lookup('service:router');
+    const { activeTransition } = routerMicrolib(route);
+
+    const toOrCurrentRoute = activeTransition ?
+      activeTransition.to : routerService.currentRoute;
+
+    const routeInfo = toOrCurrentRoute
+      .find(({ name }) => name === route.fullRouteName);
+
+    return routeInfo.parent.name;
+  }
+
+  // Ember < 3.6
   const { handlerInfos } = routerMicrolib(route).state;
 
   for (let [index, handlerInfo] of handlerInfos.entries()) {
     if (route === handlerInfo.handler) {
-      return handlerInfos[Math.max(0, index - 1)];
+      return handlerInfos[Math.max(0, index - 1)].name;
     }
   }
 }
@@ -58,6 +73,13 @@ export function attributableActions(route) {
   @returns {Boolean}
 */
 export function routeIsResolved(route) {
+  if (versionAbove('3.6')) {
+    const routerService = getOwner(route).lookup('service:router');
+
+    return routerService.isActive(route.fullRouteName);
+  }
+
+  // Ember < 3.6
   const { activeTransition } = routerMicrolib(route);
 
   if (!activeTransition) {

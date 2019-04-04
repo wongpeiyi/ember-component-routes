@@ -220,11 +220,13 @@ const ComponentOutlet = Component.extend({
 
     this.get('renderTasks').pushObject(task);
 
-    this.set('renderPromise', (async () => {
-      await this.get('renderPromise');
+    const promise = new Promise((res) => (
+      this.get('renderPromise')
+        .then(() => task.perform(this.get('renderTasks')))
+        .then(() => res())
+    ));
 
-      await task.perform(this.get('renderTasks'));
-    })());
+    this.set('renderPromise', promise);
   }
 });
 

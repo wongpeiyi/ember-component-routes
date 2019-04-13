@@ -21,13 +21,13 @@ export default ComponentRoute.extend({
 {{/code-block}}
 
 <p>
-  The classic Ember <a href="https://emberjs.com/api/ember/release/classes/Route/properties/queryParams?anchor=queryParams" target="_blank">query params configuration options</a> (specifically <code>as</code> and <code>refreshModel</code>) are preserved, while <code>defaultValue</code> is newly added.
+  The classic Ember <a href="https://emberjs.com/api/ember/release/classes/Route/properties/queryParams?anchor=queryParams" target="_blank" rel="noopener">query params configuration options</a> (specifically <code>as</code> and <code>refreshModel</code>) are preserved, while <code>defaultValue</code> is newly added.
 </p>
 
 <h2>Using Query Params</h2>
 
 <p>
-  Query param values are available in the <code>attributes</code> hook. They can also be accessed via the classic <code><a href="https://emberjs.com/api/ember/release/classes/Route/methods/paramsFor?anchor=paramsFor" target="_blank">paramsFor</a></code> method.
+  Query param values are available in the <code>attributes</code> hook. They can also be accessed via the classic <code><a href="https://emberjs.com/api/ember/release/classes/Route/methods/paramsFor?anchor=paramsFor" target="_blank" rel="noopener">paramsFor</a></code> method.
 </p>
 
 {{#code-block type="js" title="posts/route.js"}}
@@ -67,11 +67,11 @@ export default ComponentRoute.extend({
 <h2>Unidirectional Data Flow</h2>
 
 <p>
-  In classic Ember, updating a controller property that is a query param would cause a route transition. However, this opposes the <a href="https://emberway.io/ember-js-goodbye-mvc-part-1-21777ecfd708" target="_blank">unidirectional data flow</a> that is recommended as a modern-day best practice in other parts of the framework.
+  In classic Ember, updating a controller property that is a query param would cause a route transition. However, this opposes the <a href="https://emberway.io/ember-js-goodbye-mvc-part-1-21777ecfd708" target="_blank" rel="noopener">unidirectional data flow</a> that is recommended as a modern-day best practice in other parts of the framework.
 </p>
 
 <p>
-  Using <strong>ember-component-routes</strong> enforces query params to flow only one way: from routes down to components. Updating query params should be done via route transitions only, which can be done easily from the component layer using the new <a href="https://emberjs.com/api/ember/release/classes/RouterService" target="_blank">RouterService</a>.
+  Using <strong>ember-component-routes</strong> enforces query params to flow only one way: from routes down to components. Updating query params should be done via route transitions only, which can be done easily from the component layer using the new <a href="https://emberjs.com/api/ember/release/classes/RouterService" target="_blank" rel="noopener">RouterService</a>.
 </p>
 
 <p>
@@ -80,6 +80,6 @@ export default ComponentRoute.extend({
 
 
 <footer>
-  {{link-to 'Passing Attributes & Actions' 'attributes'}}
-  {{link-to 'Component Hooks' 'component-hooks'}}
+  {{link-to "Passing Attributes & Actions" "attributes"}}
+  {{link-to "Component Hooks" "component-hooks"}}
 </footer>

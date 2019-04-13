@@ -4,13 +4,17 @@
   The classic Ember route lifecycle looks something like this:
 </p>
 
-<img src={{root-url "/img/classic-ember-routing.png"}} class="attributes__classic">
+<img src={{root-url "/img/classic-ember-routing.png"}}
+  alt="classic routing"
+  class="attributes__classic">
 
 <p>
   <strong>ember-component-routes</strong> greatly simplifies the flow by removing the controller and template:
 </p>
 
-<img src={{root-url "/img/ember-component-routes-routing.png"}} class="attributes__component">
+<img src={{root-url "/img/ember-component-routes-routing.png"}}
+  alt="ember-component-routes routing"
+  class="attributes__component">
 
 <p>
   The result of the <code>model</code> hook is now passed to an intermediary <code>attributes</code> hook, the result of which is in turn passed to all components rendered by the <code>renderComponents</code> hook.
@@ -94,6 +98,6 @@ export default ComponentRoute.extend({
 </p>
 
 <footer>
-  {{link-to 'Rendering Components' 'rendering'}}
-  {{link-to 'Query Params' 'query-params'}}
+  {{link-to "Rendering Components" "rendering"}}
+  {{link-to "Query Params" "query-params"}}
 </footer>

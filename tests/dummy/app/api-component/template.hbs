@@ -79,7 +79,7 @@ didRenderComponent(fromComponent) {
 </p>
 
 <p>
-  This hook can be used to trigger certain behaviour when a route's attributes are updated but the rendered component remains the same, e.g. a change in query params only, or in {{link-to 'application-level attributes' 'attributes' (query-params anchor='application-level')}}.
+  This hook can be used to trigger certain behaviour when a route's attributes are updated but the rendered component remains the same, e.g. a change in query params only, or in {{link-to "application-level attributes" "attributes" (query-params anchor="application-level")}}.
 </p>
 
 {{!-- willTeardownComponent --}}
@@ -134,10 +134,10 @@ didRenderComponent(fromComponent) {
 
 <p>
   If a promise is returned, the component will only be destroyed after the promise is resolved. The <code>component-outlet</code> will also wait until the promise is resolved before rendering the next component.
+</p>
 
 <p>
   While awaiting the promise to be resolved, any subsequent route transitions will happen normally (i.e. the URL will change), but the corresponding renders and teardowns by the <code>component-outlet</code> will be enqueued.
-</p>
 </p>
 
 <p>
@@ -181,5 +181,5 @@ willTeardownComponent(toComponent, toRoute, teardown) {
 
 
 <footer>
-  {{link-to 'ComponentRoute' 'api-component-route' class="back"}}
+  {{link-to "ComponentRoute" "api-component-route" class="back"}}
 </footer>

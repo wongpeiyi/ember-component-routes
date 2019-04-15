@@ -1,6 +1,6 @@
 import Ember from 'ember';
 import { set } from '@ember/object';
-import { bind, run as emberRun } from '@ember/runloop';
+import { bind, run as emberRun, next } from '@ember/runloop';
 import { Promise, resolve } from 'rsvp';
 import { versionAbove } from 'ember-component-routes/-private/ember-version';
 
@@ -76,7 +76,7 @@ export default class RenderTask {
     @public
   */
   perform(tasks) {
-    run(() => set(this, 'rendered', true));
+    this._render();
 
     return this.registerPromise
       .then(() => this._awaitDidRenderComponent(tasks))
@@ -149,6 +149,16 @@ export default class RenderTask {
     return resolve(this.willTeardownComponent(
       componentName, routeName, bind(this, this._teardown)
     ));
+  }
+
+  /**
+    Adds the task to the component outlet's template, rendering it
+
+    @method _render
+    @private
+  */
+  _render() {
+    next(() => set(this, 'rendered', true));
   }
 
   /**

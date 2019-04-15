@@ -2,18 +2,18 @@ import Mixin from '@ember/object/mixin';
 import { A as emberA } from '@ember/array';
 import { computed } from '@ember/object';
 import { assign } from '@ember/polyfills';
-import { inject } from '@ember/service';
+import { inject as service } from '@ember/service';
 import { once } from '@ember/runloop';
 import { typeOf } from '@ember/utils';
 import {
   routeName,
   attributableActions,
-  parentRoute,
+  parentRouteName,
   routeIsResolved
 } from '../-private/router-utils';
 
 export default Mixin.create({
-  componentRouter: inject(),
+  componentRouter: service(),
 
   /*
     #renderTemplate is now a no-op by default except on the application route.
@@ -124,7 +124,7 @@ export default Mixin.create({
       Defaults to 'main'
   */
   renderComponent(componentName, opts = {}) {
-    const into = opts.into || parentRoute(this).name;
+    const into = opts.into || parentRouteName(this);
     const outlet = opts.outlet || 'main';
 
     this.get('componentRouter').queueRender(

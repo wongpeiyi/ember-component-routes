@@ -254,9 +254,9 @@ module('Integration | Component | component-outlet', function(hooks) {
 
       assert.ok(task.tearingdown, 'task is tearing down');
 
-      next(() => {
-        assert.notOk(this.element.querySelector('#foo'), 'component is unrendered');
-      });
+      next(() => (
+        assert.notOk(this.element.querySelector('#foo'), 'component is unrendered')
+      ));
     });
   });
 

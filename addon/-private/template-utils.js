@@ -9,7 +9,7 @@ import { getOwner } from '@ember/application';
   @returns {(Ember.Component|Ember.Controller)} Parent object
 */
 export function targetObjectOf(obj) {
-  let parent = obj._targetObject;
+  let parent = obj._target || obj._targetObject;
 
   if (parent) {
     return parent;

@@ -1,13 +1,11 @@
 import Ember from 'ember';
-import { VERSION } from '@ember/version';
 import { set } from '@ember/object';
-import { bind, run as emberRun } from '@ember/runloop';
+import { bind, run as emberRun, next } from '@ember/runloop';
 import { Promise, resolve } from 'rsvp';
-
-const [major, minor] = VERSION.split('.');
+import { versionAbove } from 'ember-component-routes/-private/ember-version';
 
 // Wrap in runloop for < Ember 2.16 and in testing mode
-const run = +major >= 2 && +minor >= 16 ?
+const run = versionAbove('2.16') ?
   (fn) => fn() :
   (fn) => Ember.testing ? emberRun(fn) : fn();
 
@@ -50,10 +48,10 @@ export default class RenderTask {
   */
   registerHooks(component) {
     this.didRenderComponent = component.didRenderComponent ?
-      bind(component, 'didRenderComponent') : resolve;
+      bind(component, 'didRenderComponent') : () => {};
 
     this.willTeardownComponent = component.willTeardownComponent ?
-      bind(component, 'willTeardownComponent') : resolve;
+      bind(component, 'willTeardownComponent') : () => {};
 
     this.didUpdateRouteAttrs = component.didUpdateRouteAttrs ?
       bind(component, 'didUpdateRouteAttrs') : () => {};
@@ -77,35 +75,18 @@ export default class RenderTask {
     @param {Array} tasks
     @public
   */
-  async perform(tasks) {
-    let componentName;
-    let routeName;
+  perform(tasks) {
+    this._render();
 
-    run(() => set(this, 'rendered', true));
-
-    await this.registerPromise;
-
-    const prevTask = tasks[tasks.indexOf(this) - 1];
-    ({ componentName, routeName } = prevTask || {});
-
-    await this.didRenderComponent(componentName, routeName);
-
-    this._removePreviousUnrenderedTasks(tasks);
-
-    await this.teardownPromise;
-
-    run(() => this.tearingdown = true);
-
-    const nextTask = tasks[tasks.indexOf(this) + 1];
-    ({ componentName, routeName } = nextTask || {});
-
-    const shouldTeardownNow = await this.willTeardownComponent(
-      componentName, routeName, bind(this, this._teardown)
-    );
-
-    if (shouldTeardownNow !== false) {
-      run(() => this._teardown());
-    }
+    return this.registerPromise
+      .then(() => this._awaitDidRenderComponent(tasks))
+      .then(() => this._awaitComponentTeardown(tasks))
+      .then(() => this._awaitWillTeardownComponent(tasks))
+      .then((shouldTeardownNow) => {
+        if (shouldTeardownNow !== false) {
+          run(() => this._teardown());
+        }
+      });
   }
 
   /**
@@ -116,12 +97,68 @@ export default class RenderTask {
     @param {Object} attributes
     @public
   */
-  async updateAttributes(attributes) {
-    await this.registerPromise;
+  updateAttributes(attributes) {
+    return this.registerPromise
+      .then(() => {
+        run(() => set(this, 'attributes', attributes));
 
-    run(() => set(this, 'attributes', attributes));
+        this.didUpdateRouteAttrs();
+      });
+  }
 
-    this.didUpdateRouteAttrs();
+  /**
+    After component is registered, await completion of #didRenderComponent
+
+    @method _awaitDidRenderComponent
+    @param {Array} tasks
+    @private
+  */
+  _awaitDidRenderComponent(tasks) {
+    const prevTask = tasks[tasks.indexOf(this) - 1];
+    const { componentName, routeName } = prevTask || {};
+
+    return resolve(this.didRenderComponent(componentName, routeName));
+  }
+
+  /**
+    After component is rendered, await teardown
+
+    @method _awaitComponentTeardown
+    @param {Array} tasks
+    @private
+  */
+  _awaitComponentTeardown(tasks) {
+    this._removePreviousUnrenderedTasks(tasks);
+
+    return this.teardownPromise;
+  }
+
+  /**
+    After component is slated for teardown, await #willTeardownComponent
+
+    @method _awaitWillTeardownComponent
+    @param {Array} tasks
+    @private
+  */
+  _awaitWillTeardownComponent(tasks) {
+    run(() => this.tearingdown = true);
+
+    const nextTask = tasks[tasks.indexOf(this) + 1];
+    const { componentName, routeName } = nextTask || {};
+
+    return resolve(this.willTeardownComponent(
+      componentName, routeName, bind(this, this._teardown)
+    ));
+  }
+
+  /**
+    Adds the task to the component outlet's template, rendering it
+
+    @method _render
+    @private
+  */
+  _render() {
+    next(() => set(this, 'rendered', true));
   }
 
   /**

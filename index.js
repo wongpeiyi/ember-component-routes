@@ -1,5 +1,5 @@
 'use strict';
 
 module.exports = {
-  name: 'ember-component-routes'
+  name: require('./package').name
 };

@@ -1,6 +1,9 @@
 import Controller from '@ember/controller';
 import { match } from '@ember/object/computed';
+import { inject as service } from '@ember/service';
 
 export default Controller.extend({
-  testing: match('currentRouteName', /^test/)
+  router: service(),
+
+  testing: match('router.currentRouteName', /^test/)
 });

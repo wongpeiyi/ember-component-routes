@@ -1,6 +1,7 @@
 import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
 import { A } from '@ember/array';
+import { next } from '@ember/runloop';
 import RenderTask from 'ember-component-routes/-private/render-task';
 
 module('Unit | render-task', function(hooks) {
@@ -89,7 +90,7 @@ module('Unit | render-task', function(hooks) {
       assert.notOk(task.rendered);
     });
 
-    assert.ok(task.rendered);
+    next(() => assert.ok(task.rendered));
 
     task.resolveRegister();
     task.resolveTeardown();
@@ -114,11 +115,13 @@ module('Unit | render-task', function(hooks) {
 
     await task.perform([task]);
 
-    assert.ok(task.rendered);
+    next(() => {
+      assert.ok(task.rendered);
 
-    teardownFn();
+      teardownFn();
 
-    assert.notOk(task.rendered);
+      assert.notOk(task.rendered);
+    })
   });
 
   test('#perform passes previous / next task properties in hooks', async function(assert) {

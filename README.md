@@ -20,7 +20,7 @@ For more info, see the [interactive docs site](https://wongpeiyi.github.io/ember
 ember install ember-component-routes
 ```
 
-This addon is tested against the release, beta and canary channels, down till Ember LTS ~2.4.0
+This addon is tested against release, beta, canary and the past three LTS releases
 
 ## Basic Usage
 

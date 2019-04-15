@@ -4,7 +4,7 @@ import RenderTask from '../-private/render-task';
 import { templateNameFor, targetObjectOf } from '../-private/template-utils';
 import { A } from '@ember/array';
 import { computed } from '@ember/object';
-import { inject } from '@ember/service';
+import { inject as service } from '@ember/service';
 import { scheduleOnce } from '@ember/runloop';
 import { resolve } from 'rsvp';
 
@@ -13,7 +13,7 @@ const ComponentOutlet = Component.extend({
 
   outletName: 'main',
 
-  componentRouter: inject(),
+  componentRouter: service(),
 
   /**
     Template name for the component or template containing this
@@ -220,11 +220,13 @@ const ComponentOutlet = Component.extend({
 
     this.get('renderTasks').pushObject(task);
 
-    this.set('renderPromise', (async () => {
-      await this.get('renderPromise');
+    const promise = new Promise((res) => (
+      this.get('renderPromise')
+        .then(() => task.perform(this.get('renderTasks')))
+        .then(() => res())
+    ));
 
-      await task.perform(this.get('renderTasks'));
-    })());
+    this.set('renderPromise', promise);
   }
 });
 

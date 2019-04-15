@@ -1,6 +1,6 @@
 {
   "name": "ember-component-routes",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Render components directly from routes in Ember",
   "keywords": [
     "ember-addon",
